@@ -33,15 +33,15 @@ namespace Ex1_Connection_And_Hierarchy_Basics_Sln
             PrintEnumerationSets(database);
             PrintCategories(database);
 
-            Console.WriteLine("Press any key to exit");
+            Console.WriteLine("Press ENTER key to close");
             Console.ReadKey();
         }
 
         static AFDatabase GetDatabase(string server, string database)
         {
             PISystems piSystems = new PISystems();
-            PISystem piSystem = piSystems[server];
-            AFDatabase afDatabase = piSystem.Databases[database];
+            PISystem assetServer = piSystems[server];
+            AFDatabase afDatabase = assetServer.Databases[database];
             return afDatabase;
         }
 

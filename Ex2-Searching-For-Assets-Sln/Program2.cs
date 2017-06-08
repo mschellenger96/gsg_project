@@ -33,24 +33,24 @@ namespace Ex2_Searching_For_Assets_Sln
             FindMetersAboveUsage(database, 300);
             FindBuildingInfo(database, "MeterAdvanced");
 
-            Console.WriteLine("Press any key to exit");
-            Console.ReadKey();
+            Console.WriteLine("Press ENTER key to close");
+            Console.ReadLine();
         }
 
-        static AFDatabase GetDatabase(string servername, string databasename)
+        static AFDatabase GetDatabase(string serverName, string databaseName)
         {
-            PISystem system = GetPISystem(null, servername);
-            if (!string.IsNullOrEmpty(databasename))
-                return system.Databases[databasename];
+            PISystem assetServer = GetPISystem(null, serverName);
+            if (!string.IsNullOrEmpty(databaseName))
+                return assetServer.Databases[databaseName];
             else
-                return system.Databases.DefaultDatabase;
+                return assetServer.Databases.DefaultDatabase;
         }
 
-        static PISystem GetPISystem(PISystems systems = null, string systemname = null)
+        static PISystem GetPISystem(PISystems systems = null, string systemName = null)
         {
             systems = systems == null ? new PISystems() : systems;
-            if (!string.IsNullOrEmpty(systemname))
-                return systems[systemname];
+            if (!string.IsNullOrEmpty(systemName))
+                return systems[systemName];
             else
                 return systems.DefaultPISystem;
         }
@@ -60,9 +60,9 @@ namespace Ex2_Searching_For_Assets_Sln
             Console.WriteLine("Find Meters by Name: {0}", elementNameFilter);
 
             // Default search is as an element name string mask.
-            string querystring = string.Format("{0}", elementNameFilter);
-            AFElementSearch elementquery = new AFElementSearch(database, "ElementSearch", querystring);
-            foreach (AFElement element in elementquery.FindElements())
+            string queryString = string.Format("{0}", elementNameFilter);
+            AFElementSearch elementQuery = new AFElementSearch(database, "ElementSearch", queryString);
+            foreach (AFElement element in elementQuery.FindElements())
             {
                 Console.WriteLine("Element: {0}, Template: {1}, Categories: {2}",
                     element.Name,
@@ -77,17 +77,17 @@ namespace Ex2_Searching_For_Assets_Sln
         {
             Console.WriteLine("Find Meters by Template: {0}", templateName);
 
-            AFElementSearch elementquery = new AFElementSearch(database, "TemplateSearch", string.Format("template:\"{0}\"", templateName));
-            AFElementSearch templatefilter = new AFElementSearch(database, "DerivedTemplates", "templateName:\"MeterAdvanced\"");
-            int countderived = 0;
-            foreach (AFElement element in elementquery.FindElements())
+            AFElementSearch elementQuery = new AFElementSearch(database, "TemplateSearch", string.Format("template:\"{0}\"", templateName));
+            AFElementSearch templateFilter = new AFElementSearch(database, "DerivedTemplates", "templateName:\"MeterAdvanced\"");
+            int countDerived = 0;
+            foreach (AFElement element in elementQuery.FindElements())
             {
                 Console.WriteLine("Element: {0}, Template: {1}", element.Name, element.Template.Name);
-                if (templatefilter.IsMatch(element))
-                    countderived++;
+                if (templateFilter.IsMatch(element))
+                    countDerived++;
             }
 
-            Console.WriteLine("   Found {0} derived templates", countderived);
+            Console.WriteLine("   Found {0} derived templates", countDerived);
 
             Console.WriteLine();
         }
@@ -98,11 +98,11 @@ namespace Ex2_Searching_For_Assets_Sln
 
             string templateName = "MeterBasic";
             string attributeName = "Substation";
-            AFElementSearch elementquery = new AFElementSearch(database, "AttributeValueEQSearch",
+            AFElementSearch elementQuery = new AFElementSearch(database, "AttributeValueEQSearch",
                 string.Format("template:\"{0}\" \"|{1}\":\"{2}\"", templateName, attributeName, substationLocation));
 
             int countNames = 0;
-            foreach (AFElement element in elementquery.FindElements())
+            foreach (AFElement element in elementQuery.FindElements())
             {
                 Console.Write("{0}{1}", countNames++ == 0 ? string.Empty : ", ", element.Name);
             }
@@ -116,11 +116,11 @@ namespace Ex2_Searching_For_Assets_Sln
 
             string templateName = "MeterBasic";
             string attributeName = "Energy Usage";
-            AFElementSearch elementquery = new AFElementSearch(database, "AttributeValueGTSearch",
+            AFElementSearch elementQuery = new AFElementSearch(database, "AttributeValueGTSearch",
                 string.Format("template:\"{0}\" \"|{1}\":>{2}", templateName, attributeName, val));
 
             int countNames = 0;
-            foreach (AFElement element in elementquery.FindElements())
+            foreach (AFElement element in elementQuery.FindElements())
             {
                 Console.Write("{0}{1}", countNames++ == 0 ? string.Empty : ", ", element.Name);
             }
@@ -134,21 +134,25 @@ namespace Ex2_Searching_For_Assets_Sln
 
             AFElementTemplate elemTemp = database.ElementTemplates[templateName];
             AFCategory buildingInfoCat = database.AttributeCategories["Building Info"];
-            
-            AFNamedCollectionList<AFAttribute> foundAttributes = AFAttribute.FindElementAttributes(
-                                                    database: database,
-                                                    searchRoot: null,
-                                                    nameFilter: "*",
-                                                    elemCategory: null,
-                                                    elemTemplate: elemTemp,
-                                                    elemType: AFElementType.Any,
-                                                    attrNameFilter: "*",
-                                                    attrCategory: buildingInfoCat,
-                                                    attrType: TypeCode.Empty,
-                                                    searchFullHierarchy: true,
-                                                    sortField: AFSortField.Name,
-                                                    sortOrder: AFSortOrder.Ascending,
-                                                    maxCount: 100);
+
+            AFSearchToken token = new AFSearchToken(AFSearchFilter.Template, AFSearchOperator.Equal, elemTemp.GetPath());
+
+            AFElementSearch search = new AFElementSearch(database, "search", new[] { token });
+
+            IEnumerable<AFElement> foundElements = search.FindElements();
+            AFNamedCollectionList<AFAttribute> foundAttributes = new AFNamedCollectionList<AFAttribute>();
+
+
+            foreach (AFElement foundElem in foundElements)
+            {
+                foreach (AFAttribute attr in foundElem.Attributes)
+                {
+                    if (attr.Categories.Contains(buildingInfoCat))
+                    {
+                        foundAttributes.Add(attr);
+                    }
+                }
+            }
 
             Console.WriteLine("Found {0} attributes.", foundAttributes.Count);
             Console.WriteLine();

@@ -29,25 +29,30 @@ namespace Ex2_Searching_For_Assets
             AFDatabase database = GetDatabase("PISRV01", "Green Power Company");
             FindMetersByName(database, "Meter00*");
             FindMetersByTemplate(database, "MeterBasic");
-            FindMetersBySubstation(database, "Edinburgh");
+            FindMetersBySubstation(database, "SSA*");
             FindMetersAboveUsage(database, 300);
             FindBuildingInfo(database, "MeterAdvanced");
 
-            Console.WriteLine("Press any key to exit");
-            Console.ReadKey();
+            Console.WriteLine("Press ENTER key to close");
+            Console.ReadLine();
         }
 
-        static AFDatabase GetDatabase(string servername, string databasename)
+        static AFDatabase GetDatabase(string serverName, string databaseName)
         {
-            PISystems piafsystems = new PISystems();
-            PISystem system = piafsystems[servername];
-            if (system != null && system.Databases.Contains(databasename))
-            {
-                Console.WriteLine("Found '{0}' with '{1}' databases", system.Name, system.Databases.Count);
-                return system.Databases[databasename];
-            }
+            PISystem assetServer = GetPISystem(null, serverName);
+            if (!string.IsNullOrEmpty(databaseName))
+                return assetServer.Databases[databaseName];
             else
-                return null;
+                return assetServer.Databases.DefaultDatabase;
+        }
+
+        static PISystem GetPISystem(PISystems systems = null, string systemName = null)
+        {
+            systems = systems == null ? new PISystems() : systems;
+            if (!string.IsNullOrEmpty(systemName))
+                return systems[systemName];
+            else
+                return systems.DefaultPISystem;
         }
 
         static void FindMetersByName(AFDatabase database, string elementNameFilter)
@@ -55,9 +60,9 @@ namespace Ex2_Searching_For_Assets
             Console.WriteLine("Find Meters by Name: {0}", elementNameFilter);
 
             // Default search is as an element name string mask.
-            string querystring = string.Format("{0}", elementNameFilter);
-            AFElementSearch elementquery = new AFElementSearch(database, "ElementSearch", querystring);
-            foreach (AFElement element in elementquery.FindElements())
+            string queryString = string.Format("{0}", elementNameFilter);
+            AFElementSearch elementQuery = new AFElementSearch(database, "ElementSearch", queryString);
+            foreach (AFElement element in elementQuery.FindElements())
             {
                 Console.WriteLine("Element: {0}, Template: {1}, Categories: {2}",
                     element.Name,
@@ -70,62 +75,23 @@ namespace Ex2_Searching_For_Assets
 
         static void FindMetersByTemplate(AFDatabase database, string templateName)
         {
-            Console.WriteLine("Find Meters By Template: {0}", templateName);
-            AFElementSearch elementQuery = new AFElementSearch(database, "TemplateSearch", string.Format("template:\"{0}\"", templateName));
-            AFElementSearch templateFilter = new AFElementSearch(database, "DerivedTemplates", string.Format("templateName:\"MeterAdvanced\""));
-
-            int count = 0;
-            foreach (AFElement element in elementQuery.FindElements())
-            {
-                Console.WriteLine("Element: {0}, Template: {1}", element.Name, element.Template.Name);
-                if (templateFilter.IsMatch(element))
-                {
-                    count++;
-                }
-            }
-            Console.WriteLine("Found {0} derived templates", count);
-            Console.WriteLine();
+            /// Your code here
 
         }
 
         static void FindMetersBySubstation(AFDatabase database, string substationLocation)
         {
-            // Your code here
+            /// Your code here
         }
 
         static void FindMetersAboveUsage(AFDatabase database, double val)
         {
-            // Your code here
+            /// Your code here
         }
 
         static void FindBuildingInfo(AFDatabase database, string templateName)
         {
-            Console.WriteLine("Find Building Info: {0}", templateName);
-
-            AFElementTemplate elemTemp = database.ElementTemplates[templateName];
-            AFCategory buildingInfoCat = database.AttributeCategories["Building Info"];
-
-            AFSearchToken token = new AFSearchToken(AFSearchFilter.Template, AFSearchOperator.Equal, elemTemp.GetPath());
-            ///AFSearchToken token2 = new AFSearchToken(AFSearchFilter.Value, AFSearchOperator.Equal, buildingInfoCat.GetPath());
-
-            AFElementSearch search = new AFElementSearch(database, "search", new[] { token });
-
-            IEnumerable<AFElement> foundElements = search.FindElements();
-            AFNamedCollectionList<AFAttribute> foundAttributes = new AFNamedCollectionList<AFAttribute>();
-            
-            foreach (AFElement foundElem in foundElements)
-            {
-                foreach (AFAttribute attr in foundElem.Attributes)
-                {
-                    if (attr.Categories.Contains(buildingInfoCat))
-                    {
-                        foundAttributes.Add(attr);
-                    }
-                }
-            }
-
-            Console.WriteLine("Found {0} attributes.", foundAttributes.Count);
-            Console.WriteLine();
+            /// Your code here
         }
     }
 }

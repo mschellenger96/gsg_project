@@ -36,24 +36,24 @@ namespace Ex3_Reading_And_Writing_Data
             PrintDailyAverageEnergyUsage(database, "t-7d", "t");
             SwapValues(database, "Meter001", "Meter002", "y", "y+1h");
 
-            Console.WriteLine("Press any key to exit");
-            Console.ReadKey();
+            Console.WriteLine("Press ENTER key to close");
+            Console.ReadLine();
         }
 
-        static AFDatabase GetDatabase(string servername, string databasename)
+        static AFDatabase GetDatabase(string serverName, string databaseName)
         {
-            PISystem system = GetPISystem(null, servername);
-            if (!string.IsNullOrEmpty(databasename))
-                return system.Databases[databasename];
+            PISystem assetServer = GetPISystem(null, serverName);
+            if (!string.IsNullOrEmpty(databaseName))
+                return assetServer.Databases[databaseName];
             else
-                return system.Databases.DefaultDatabase;
+                return assetServer.Databases.DefaultDatabase;
         }
 
-        static PISystem GetPISystem(PISystems systems = null, string systemname = null)
+        static PISystem GetPISystem(PISystems systems = null, string systemName = null)
         {
             systems = systems == null ? new PISystems() : systems;
-            if (!string.IsNullOrEmpty(systemname))
-                return systems[systemname];
+            if (!string.IsNullOrEmpty(systemName))
+                return systems[systemName];
             else
                 return systems.DefaultPISystem;
         }
