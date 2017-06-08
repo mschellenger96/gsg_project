@@ -11,3 +11,4 @@ Below is a log of changes that have been made:
 	- Changed database names to match current example database names
 
 	- Updated FindBuildingInfo method from Lesson 2 to use the AFElementSearch.FineElements method rather than AFElement.FindElemetns
+		- Updated method to fit format and conventions of other methods in solution

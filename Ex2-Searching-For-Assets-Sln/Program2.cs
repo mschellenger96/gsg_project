@@ -27,10 +27,10 @@ namespace Ex2_Searching_For_Assets_Sln
         {
             AFDatabase database = GetDatabase("PISRV01", "Green Power Company");
             
-            FindMetersByName(database, "Meter00*");
+            /*FindMetersByName(database, "Meter00*");
             FindMetersByTemplate(database, "MeterBasic");
             FindMetersBySubstation(database, "SSA*");
-            FindMetersAboveUsage(database, 300);
+            FindMetersAboveUsage(database, 300);*/
             FindBuildingInfo(database, "MeterAdvanced");
 
             Console.WriteLine("Press ENTER key to close");
@@ -134,27 +134,22 @@ namespace Ex2_Searching_For_Assets_Sln
 
             AFElementTemplate elemTemp = database.ElementTemplates[templateName];
             AFCategory buildingInfoCat = database.AttributeCategories["Building Info"];
+            
+            AFElementSearch elementQuery = new AFElementSearch(database, "AttributeCattegorySearch", string.Format("template:\"{0}\"", templateName));
 
-            AFSearchToken token = new AFSearchToken(AFSearchFilter.Template, AFSearchOperator.Equal, elemTemp.GetPath());
-
-            AFElementSearch search = new AFElementSearch(database, "search", new[] { token });
-
-            IEnumerable<AFElement> foundElements = search.FindElements();
-            AFNamedCollectionList<AFAttribute> foundAttributes = new AFNamedCollectionList<AFAttribute>();
-
-
-            foreach (AFElement foundElem in foundElements)
+            int attrCount = 0;
+            foreach (AFElement element in elementQuery.FindElements())
             {
-                foreach (AFAttribute attr in foundElem.Attributes)
+                foreach (AFAttribute attr in element.Attributes)
                 {
                     if (attr.Categories.Contains(buildingInfoCat))
                     {
-                        foundAttributes.Add(attr);
+                        attrCount++;
                     }
                 }
             }
 
-            Console.WriteLine("Found {0} attributes.", foundAttributes.Count);
+            Console.WriteLine("Found {0} attributes.", attrCount);
             Console.WriteLine();
         }
     }
