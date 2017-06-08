@@ -27,10 +27,10 @@ namespace Ex2_Searching_For_Assets_Sln
         {
             AFDatabase database = GetDatabase("PISRV01", "Green Power Company");
             
-            /*FindMetersByName(database, "Meter00*");
+            FindMetersByName(database, "Meter00*");
             FindMetersByTemplate(database, "MeterBasic");
             FindMetersBySubstation(database, "SSA*");
-            FindMetersAboveUsage(database, 300);*/
+            FindMetersAboveUsage(database, 300);
             FindBuildingInfo(database, "MeterAdvanced");
 
             Console.WriteLine("Press ENTER key to close");
