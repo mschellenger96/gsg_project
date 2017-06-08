@@ -1,4 +1,5 @@
-Project to update code and documentation for PI AF SDK Getting Started Guide
+Project to update code and documentation for PI AF SDK Getting Started Guide for purposes of increasing clarity.
+
 Below is a log of changes that have been made:
 
 	- Changed variable names to align marketing terms with code objects
