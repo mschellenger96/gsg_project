@@ -24,6 +24,7 @@ namespace Ex1_Connection_And_Hierarchy_Basics
     {
         static void Main(string[] args)
         {
+
             AFDatabase database = GetDatabase("PISRV01", "Green Power Company");
 
             PrintRootElements(database);
@@ -39,9 +40,9 @@ namespace Ex1_Connection_And_Hierarchy_Basics
 
         static AFDatabase GetDatabase(string server, string database)
         {
-            PISystems piSystems = new PISystems();
-            PISystem piSystem = piSystems[server];
-            AFDatabase afDatabase = piSystem.Databases[database];
+            PISystems assetServers = new PISystems();
+            PISystem assetServer = assetServers[server];
+            AFDatabase afDatabase = assetServer.Databases[database];
             return afDatabase;
         }
 
@@ -58,27 +59,91 @@ namespace Ex1_Connection_And_Hierarchy_Basics
 
         static void PrintElementTemplates(AFDatabase database)
         {
-            // Your code here
+            Console.WriteLine("Print Element Templates");
+            AFNamedCollectionList<AFElementTemplate> elemTemplates = database.ElementTemplates.FilterBy(typeof(AFElement));
+            foreach (AFElementTemplate elemTemp in elemTemplates)
+            {
+                string[] categories = new string[elemTemp.Categories.Count];
+                int i = 0;
+                foreach (AFCategory category in elemTemp.Categories)
+                {
+                    categories[i++] = category.Name;
+                }
+
+
+                string categoriesString = string.Join(",", categories);
+                Console.WriteLine("Name: {0}, Categories: {1}", elemTemp.Name, categoriesString);
+
+                // Note: An alternative approach is to use CategoriesString directly: "CategoriesString read only property returns the list of categories in a string separated by semicolons."
+                //Console.WriteLine("Name: {0}, Categories: {1}", elemTemp.Name, elemTemp.CategoriesString);
+            }
+
+            Console.WriteLine();
         }
 
         static void PrintAttributeTemplates(AFDatabase database, string elemTempName)
         {
-            // Your code here
+            Console.WriteLine("Print Attribute Templates for Element Template: {0}", elemTempName);
+            AFElementTemplate elemTemp = database.ElementTemplates[elemTempName];
+            foreach (AFAttributeTemplate attrTemp in elemTemp.AttributeTemplates)
+            {
+                string drName = attrTemp.DataReferencePlugIn == null ? "None" : attrTemp.DataReferencePlugIn.Name;
+                Console.WriteLine("Name: {0}, DRPlugin: {1}", attrTemp.Name, drName);
+            }
+
+            Console.WriteLine();
         }
 
         static void PrintEnergyUOMs(PISystem system)
         {
-            // Your code here
+            Console.WriteLine("Print Energy UOMs");
+            UOMClass uomClass = system.UOMDatabase.UOMClasses["Energy"];
+            foreach (UOM uom in uomClass.UOMs)
+            {
+                Console.WriteLine("UOM: {0}, Abbreviation: {1}", uom.Name, uom.Abbreviation);
+            }
+
+            Console.WriteLine();
         }
 
         static void PrintEnumerationSets(AFDatabase database)
         {
-            // Your code here
+            Console.WriteLine("Print Enumeration Sets\n");
+            AFEnumerationSets enumSets = database.EnumerationSets;
+            foreach (AFEnumerationSet enumSet in enumSets)
+            {
+                Console.WriteLine(enumSet.Name);
+                foreach (AFEnumerationValue state in enumSet)
+                {
+                    int stateValue = state.Value;
+                    string stateName = state.Name;
+                    Console.WriteLine("{0} - {1}", stateValue, stateName);
+                }
+
+                Console.WriteLine();
+            }
         }
 
         static void PrintCategories(AFDatabase database)
         {
-            // Your code here
+            Console.WriteLine("Print Categories\n");
+            AFCategories elemCategories = database.ElementCategories;
+            AFCategories attrCategories = database.AttributeCategories;
+
+            Console.WriteLine("Element Categories");
+            foreach (AFCategory category in elemCategories)
+            {
+                Console.WriteLine(category.Name);
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Attribute Categories");
+            foreach (AFCategory category in attrCategories)
+            {
+                Console.WriteLine(category.Name);
+            }
+
+            Console.WriteLine();
         }
     }
 }

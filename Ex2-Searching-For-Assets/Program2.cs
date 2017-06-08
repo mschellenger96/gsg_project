@@ -25,6 +25,7 @@ namespace Ex2_Searching_For_Assets
     {
         static void Main(string[] args)
         {
+
             AFDatabase database = GetDatabase("PISRV01", "Green Power Company");
             FindMetersByName(database, "Meter00*");
             FindMetersByTemplate(database, "MeterBasic");
@@ -69,7 +70,22 @@ namespace Ex2_Searching_For_Assets
 
         static void FindMetersByTemplate(AFDatabase database, string templateName)
         {
-            // Your code here
+            Console.WriteLine("Find Meters By Template: {0}", templateName);
+            AFElementSearch elementQuery = new AFElementSearch(database, "TemplateSearch", string.Format("template:\"{0}\"", templateName));
+            AFElementSearch templateFilter = new AFElementSearch(database, "DerivedTemplates", string.Format("templateName:\"MeterAdvanced\""));
+
+            int count = 0;
+            foreach (AFElement element in elementQuery.FindElements())
+            {
+                Console.WriteLine("Element: {0}, Template: {1}", element.Name, element.Template.Name);
+                if (templateFilter.IsMatch(element))
+                {
+                    count++;
+                }
+            }
+            Console.WriteLine("Found {0} derived templates", count);
+            Console.WriteLine();
+
         }
 
         static void FindMetersBySubstation(AFDatabase database, string substationLocation)
@@ -84,7 +100,32 @@ namespace Ex2_Searching_For_Assets
 
         static void FindBuildingInfo(AFDatabase database, string templateName)
         {
-            // Your code here
+            Console.WriteLine("Find Building Info: {0}", templateName);
+
+            AFElementTemplate elemTemp = database.ElementTemplates[templateName];
+            AFCategory buildingInfoCat = database.AttributeCategories["Building Info"];
+
+            AFSearchToken token = new AFSearchToken(AFSearchFilter.Template, AFSearchOperator.Equal, elemTemp.GetPath());
+            ///AFSearchToken token2 = new AFSearchToken(AFSearchFilter.Value, AFSearchOperator.Equal, buildingInfoCat.GetPath());
+
+            AFElementSearch search = new AFElementSearch(database, "search", new[] { token });
+
+            IEnumerable<AFElement> foundElements = search.FindElements();
+            AFNamedCollectionList<AFAttribute> foundAttributes = new AFNamedCollectionList<AFAttribute>();
+            
+            foreach (AFElement foundElem in foundElements)
+            {
+                foreach (AFAttribute attr in foundElem.Attributes)
+                {
+                    if (attr.Categories.Contains(buildingInfoCat))
+                    {
+                        foundAttributes.Add(attr);
+                    }
+                }
+            }
+
+            Console.WriteLine("Found {0} attributes.", foundAttributes.Count);
+            Console.WriteLine();
         }
     }
 }
