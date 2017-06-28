@@ -60,7 +60,7 @@ namespace Ex2_Searching_For_Assets_Sln
             Console.WriteLine("Find Meters by Name: {0}", elementNameFilter);
 
             // Default search is as an element name string mask.
-            string queryString = string.Format("{0}", elementNameFilter);
+            var queryString = $"\"{elementNameFilter}\"";
             AFElementSearch elementQuery = new AFElementSearch(database, "ElementSearch", queryString);
             foreach (AFElement element in elementQuery.FindElements())
             {
@@ -136,20 +136,20 @@ namespace Ex2_Searching_For_Assets_Sln
             AFCategory buildingInfoCat = database.AttributeCategories["Building Info"];
             
             AFElementSearch elementQuery = new AFElementSearch(database, "AttributeCattegorySearch", string.Format("template:\"{0}\"", templateName));
+            AFNamedCollectionList<AFAttribute> foundAttributes = new AFNamedCollectionList<AFAttribute>();
 
-            int attrCount = 0;
             foreach (AFElement element in elementQuery.FindElements())
             {
                 foreach (AFAttribute attr in element.Attributes)
                 {
                     if (attr.Categories.Contains(buildingInfoCat))
                     {
-                        attrCount++;
+                        foundAttributes.Add(attr);
                     }
                 }
             }
 
-            Console.WriteLine("Found {0} attributes.", attrCount);
+            Console.WriteLine("Found {0} attributes.", foundAttributes.Count);
             Console.WriteLine();
         }
     }
