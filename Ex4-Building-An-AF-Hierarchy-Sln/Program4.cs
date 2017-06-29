@@ -79,10 +79,8 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
         {
             if (database.Elements.Contains("Feeders"))
                 return;
-            else
-            {
-                database.Elements.Add("Feeders");
-            }
+
+            database.Elements.Add("Feeders");
             database.CheckIn();
         }
 

@@ -17,6 +17,7 @@ using System;
 using OSIsoft.AF;
 using OSIsoft.AF.Asset;
 using OSIsoft.AF.UnitsOfMeasure;
+using System.Collections.Generic;
 
 namespace Ex1_Connection_And_Hierarchy_Basics_Sln
 {
@@ -62,16 +63,14 @@ namespace Ex1_Connection_And_Hierarchy_Basics_Sln
             AFNamedCollectionList<AFElementTemplate> elemTemplates = database.ElementTemplates.FilterBy(typeof(AFElement));
             foreach (AFElementTemplate elemTemp in elemTemplates)
             {
-                string[] categories = new string[elemTemp.Categories.Count];
-                int i = 0;
+                var categories = new List<string>();
                 foreach (AFCategory category in elemTemp.Categories)
                 {
-                    categories[i++] = category.Name;
+                    categories.Add(category.Name);
                 }
 
-                
                 string categoriesString = string.Join(",", categories);
-                Console.WriteLine("Name: {0}, Categories: {1}", elemTemp.Name, categoriesString);
+                Console.WriteLine("Name: {0}; Categories: {1}", elemTemp.Name, categoriesString);
 
                 // Note: An alternative approach is to use CategoriesString directly: "CategoriesString read only property returns the list of categories in a string separated by semicolons."
                 //Console.WriteLine("Name: {0}, Categories: {1}", elemTemp.Name, elemTemp.CategoriesString);
@@ -114,9 +113,7 @@ namespace Ex1_Connection_And_Hierarchy_Basics_Sln
                 Console.WriteLine(enumSet.Name);
                 foreach (AFEnumerationValue state in enumSet)
                 {
-                    int stateValue = state.Value;
-                    string stateName = state.Name;
-                    Console.WriteLine("{0} - {1}", stateValue, stateName);
+                    Console.WriteLine("{0} - {1}", state.Value, state.Name);
                 }
 
                 Console.WriteLine();
@@ -126,18 +123,15 @@ namespace Ex1_Connection_And_Hierarchy_Basics_Sln
         static void PrintCategories(AFDatabase database)
         {
             Console.WriteLine("Print Categories\n");
-            AFCategories elemCategories = database.ElementCategories;
-            AFCategories attrCategories = database.AttributeCategories;
-
             Console.WriteLine("Element Categories");
-            foreach (AFCategory category in elemCategories)
+            foreach (AFCategory category in database.ElementCategories)
             {
                 Console.WriteLine(category.Name);
             }
 
             Console.WriteLine();
             Console.WriteLine("Attribute Categories");
-            foreach (AFCategory category in attrCategories)
+            foreach (AFCategory category in database.AttributeCategories)
             {
                 Console.WriteLine(category.Name);
             }

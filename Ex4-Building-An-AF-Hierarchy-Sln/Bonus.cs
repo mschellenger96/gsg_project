@@ -18,6 +18,7 @@ using System.Linq;
 using OSIsoft.AF;
 using OSIsoft.AF.Asset;
 using OSIsoft.AF.UnitsOfMeasure;
+using System.Collections.Generic;
 
 namespace Ex4_Building_An_AF_Hierarchy_Sln
 {
@@ -25,7 +26,7 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
     {
         public static void Run()
         {
-            AFDatabase database = CreateDatabase("PISRV01", "Ethical Power Company");
+            AFDatabase database = GetOrCreateDatabase("PISRV01", "Ethical Power Company");
             CreateCategories(database);
             CreateEnumerationSets(database);
             CreateTemplates(database);
@@ -35,43 +36,35 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
             CreateWeakReferences(database);
         }
 
-        private static AFDatabase CreateDatabase(string servername, string databasename)
+        private static AFDatabase GetOrCreateDatabase(string servername, string databasename)
         {
-            AFDatabase database = null;
-            PISystems piafsystems = new PISystems();
-            PISystem system = piafsystems[servername];
-            if (system != null)
-            {
-                if (system.Databases.Contains(databasename))
-                    database = system.Databases[databasename];
-                else
-                    database = system.Databases.Add(databasename);
-            }
-
+            PISystem assetServer = new PISystems()[servername];
+            if (assetServer == null)
+                return null;
+            AFDatabase database = assetServer.Databases[databasename];
+            if (database == null)
+                database = assetServer.Databases.Add(databasename);
             return database;
         }
 
         private static void CreateCategories(AFDatabase database)
         {
             if (database == null) return;
-
-            if (!database.ElementCategories.Contains("Measures Energy"))
-                database.ElementCategories.Add("Measures Energy");
-
-            if (!database.ElementCategories.Contains("Shows Status"))
-                database.ElementCategories.Add("Shows Status");
-
-            if (!database.AttributeCategories.Contains("Building Info"))
-                database.AttributeCategories.Add("Building Info");
-
-            if (!database.AttributeCategories.Contains("Location"))
-                database.AttributeCategories.Add("Location");
-
-            if (!database.AttributeCategories.Contains("Time-Series Data"))
-                database.AttributeCategories.Add("Time-Series Data");
-
-            database.CheckIn();
+            var items = new List<string>();
+            items.Add("Measures Energy");
+            items.Add("Shows Status");
+            items.Add("Building Info");
+            items.Add("Location");
+            items.Add("Time - Series Data");
+            foreach (var item in items)
+            {
+                if (!database.ElementCategories.Contains(item))
+                    database.ElementCategories.Add(item);
+            }
+            if (database.IsDirty)
+                database.CheckIn();
         }
+
 
         private static void CreateEnumerationSets(AFDatabase database)
         {
@@ -90,8 +83,8 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
                 mStatusEnum.Add("Good", 0);
                 mStatusEnum.Add("Bad", 1);
             }
-
-            database.CheckIn();
+            if (database.IsDirty)
+                database.CheckIn();
         }
 
         private static void CreateTemplates(AFDatabase database)
@@ -173,7 +166,8 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
 
             // Do a checkin at the end instead of one-by-one.
 
-            database.CheckIn();
+            if (database.IsDirty)
+                database.CheckIn();
         }
 
         private static void CreateElements(AFDatabase database)
@@ -192,10 +186,9 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
                
 
             AFElement meters;
-            if (!database.Elements.Contains("Meters"))
+            meters = database.Elements["Meters"];
+            if (meters == null)
                 meters = database.Elements.Add("Meters");
-            else
-                meters = database.Elements["Meters"];
 
             AFElementTemplate basic = database.ElementTemplates["MeterBasic"];
             AFElementTemplate advanced = database.ElementTemplates["MeterAdvanced"];
@@ -209,8 +202,8 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
                     AFElement e = meters.Elements.Add(name, eTemp);
                 }
             }
-
-            database.CheckIn();
+            if (database.IsDirty)
+                database.CheckIn();
         }
 
         /// <summary>
@@ -245,8 +238,8 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
                 geoLocations.Elements.Add("Montreal", cityTemplate);
                 geoLocations.Elements.Add("San Francisco", cityTemplate);
             }
-
-            database.CheckIn();
+            if (database.IsDirty)
+                database.CheckIn();
         }
 
         private static void CreateWeakReferences(AFDatabase database)
@@ -275,7 +268,8 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
             montreal.Elements.Add(meters.Elements["Meter011"], weakRefType);
             montreal.Elements.Add(meters.Elements["Meter012"], weakRefType);
 
-            database.CheckIn();
+            if (database.IsDirty)
+                database.CheckIn();
         }
     }
 }

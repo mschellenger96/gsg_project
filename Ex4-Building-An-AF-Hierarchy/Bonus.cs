@@ -18,6 +18,7 @@ using System.Linq;
 using OSIsoft.AF;
 using OSIsoft.AF.Asset;
 using OSIsoft.AF.UnitsOfMeasure;
+using System.Collections.Generic;
 
 namespace Ex4_Building_An_AF_Hierarchy
 {
@@ -25,7 +26,7 @@ namespace Ex4_Building_An_AF_Hierarchy
     {
         static void Run()
         {
-            AFDatabase database = CreateDatabase("PISRV01", "Ethical Power Company");
+            AFDatabase database = GetOrCreateDatabase("PISRV01", "Ethical Power Company");
             CreateCategories(database);
             CreateEnumerationSets(database);
             CreateTemplates(database);
@@ -35,7 +36,7 @@ namespace Ex4_Building_An_AF_Hierarchy
             CreateWeakReferences(database);
         }
 
-        static AFDatabase CreateDatabase(string servername, string databasename)
+        static AFDatabase GetOrCreateDatabase(string servername, string databasename)
         {
             AFDatabase database = null;
             // Your code here
