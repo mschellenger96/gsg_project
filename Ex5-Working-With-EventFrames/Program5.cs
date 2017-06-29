@@ -58,24 +58,24 @@ namespace Ex5_Working_With_EventFrames
 
         static AFElementTemplate CreateEventFrameTemplate(AFDatabase database)
         {
-            AFElementTemplate eventframetemplate = null;
-            if (database.ElementTemplates.Contains("Daily Usage"))
-            {
-                return database.ElementTemplates["Daily Usage"];
-            }
+            AFElementTemplate eventFrameTemplate = database.ElementTemplates["Daily Usage"];
+            if (eventFrameTemplate != null)
+                return eventFrameTemplate;
 
-            eventframetemplate = database.ElementTemplates.Add("Daily Usage");
-            eventframetemplate.InstanceType = typeof(AFEventFrame);
-            eventframetemplate.NamingPattern = @"%TEMPLATE%-%ELEMENT%-%STARTTIME:yyyy-MM-dd%-EF*";
+            eventFrameTemplate = database.ElementTemplates.Add("Daily Usage");
+            eventFrameTemplate.InstanceType = typeof(AFEventFrame);
+            eventFrameTemplate.NamingPattern = @"%TEMPLATE%-%ELEMENT%-%STARTTIME:yyyy-MM-dd%-EF*";
 
-            AFAttributeTemplate usage = eventframetemplate.AttributeTemplates.Add("Average Energy Usage");
-            usage.Type = typeof(double);
+            AFAttributeTemplate usage = eventFrameTemplate.AttributeTemplates.Add("Average Energy Usage");
+            usage.Type = typeof(Single);
             usage.DataReferencePlugIn = AFDataReference.GetPIPointDataReference();
             usage.ConfigString = @".\Elements[.]|Energy Usage;TimeRangeMethod=Average";
             usage.DefaultUOM = database.PISystem.UOMDatabase.UOMs["kilowatt hour"];
 
-            database.CheckIn();
-            return eventframetemplate;
+            if (database.IsDirty)
+                database.CheckIn();
+
+            return eventFrameTemplate;
         }
 
         static void CreateEventFrames(AFDatabase database, AFElementTemplate eventFrameTemplate)

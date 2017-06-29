@@ -58,102 +58,87 @@ namespace Ex5_Working_With_EventFrames_Sln
 
         static AFElementTemplate CreateEventFrameTemplate(AFDatabase database)
         {
-            AFElementTemplate eventframetemplate = null;
-            if (database.ElementTemplates.Contains("Daily Usage"))
-            {
-                return database.ElementTemplates["Daily Usage"];
-            }
+            AFElementTemplate eventFrameTemplate = database.ElementTemplates["Daily Usage"];
+            if (eventFrameTemplate != null)
+                return eventFrameTemplate;
 
-            eventframetemplate = database.ElementTemplates.Add("Daily Usage");
-            eventframetemplate.InstanceType = typeof(AFEventFrame);
-            eventframetemplate.NamingPattern = @"%TEMPLATE%-%ELEMENT%-%STARTTIME:yyyy-MM-dd%-EF*";
+            eventFrameTemplate = database.ElementTemplates.Add("Daily Usage");
+            eventFrameTemplate.InstanceType = typeof(AFEventFrame);
+            eventFrameTemplate.NamingPattern = @"%TEMPLATE%-%ELEMENT%-%STARTTIME:yyyy-MM-dd%-EF*";
 
-            AFAttributeTemplate usage = eventframetemplate.AttributeTemplates.Add("Average Energy Usage");
-            usage.Type = typeof(double);
+            AFAttributeTemplate usage = eventFrameTemplate.AttributeTemplates.Add("Average Energy Usage");
+            usage.Type = typeof(Single);
             usage.DataReferencePlugIn = AFDataReference.GetPIPointDataReference();
             usage.ConfigString = @".\Elements[.]|Energy Usage;TimeRangeMethod=Average";
             usage.DefaultUOM = database.PISystem.UOMDatabase.UOMs["kilowatt hour"];
 
-            database.CheckIn();
-            return eventframetemplate;
+            if (database.IsDirty)
+                database.CheckIn();
+
+            return eventFrameTemplate;
         }
 
         static void CreateEventFrames(AFDatabase database, AFElementTemplate eventFrameTemplate)
         {
-            const int pageSize = 1000;
-            int startIndex = 0;
-            int totalCount;
-            do
+            string queryString = "Template:MeterBasic";
             {
                 // This method returns the collection of AFBaseElement objects that were created with this template.
-                AFNamedCollectionList<AFBaseElement> results = database.ElementTemplates["MeterBasic"].FindInstantiatedElements(
-                    includeDerived: true,
-                    sortField: AFSortField.Name,
-                    sortOrder: AFSortOrder.Ascending,
-                    startIndex: startIndex,
-                    maxCount: pageSize,
-                    totalCount: out totalCount
-                    );
+                AFElementSearch elementQuery = new AFElementSearch(database, "Meters", queryString);
 
-                IList<AFElement> meters = results.Select(elm => (AFElement)elm).ToList();
-
-                DateTime timereference = DateTime.Now.AddDays(-7);
-                //AFTime startTime = new AFTime(new DateTime(timereference.Year, timereference.Month, timereference.Day, 0, 0, 0, DateTimeKind.Local));
-                foreach (AFElement meter in meters)
+                DateTime timeReference = DateTime.Today.AddDays(-7);
+                int count = 0;
+                foreach (AFElement meter in elementQuery.FindElements())
                 {
                     foreach (int day in Enumerable.Range(1, 7))
                     {
-                        AFTime startTime = new AFTime(timereference.AddDays(day - 1));
+                        AFTime startTime = new AFTime(timeReference.AddDays(day - 1));
                         AFTime endTime = new AFTime(startTime.LocalTime.AddDays(1));
                         AFEventFrame ef = new AFEventFrame(database, "*", eventFrameTemplate);
                         ef.SetStartTime(startTime);
                         ef.SetEndTime(endTime);
                         ef.PrimaryReferencedElement = meter;
+                        if (++count % 500 == 0)
+                            database.CheckIn();
                     }
                 }
-
+            } 
+            if (database.IsDirty)
                 database.CheckIn();
-
-                startIndex += pageSize;
-            } while (startIndex < totalCount);
-
-            database.CheckIn();
         }
 
         static public void CaptureValues(AFDatabase database, AFElementTemplate eventFrameTemplate)
         {
             // Formulate search constraints on time and template
-            DateTime timereference = DateTime.Now.AddDays(-7);
-            AFTime startTime = new AFTime(new DateTime(timereference.Year, timereference.Month, timereference.Day, 0, 0, 0, DateTimeKind.Local));
-            string query = string.Format("template:\"{0}\"", eventFrameTemplate.Name);
-            AFEventFrameSearch eventFrameSearch = new AFEventFrameSearch(database, "EventFrame Captures", AFEventFrameSearchMode.ForwardFromStartTime, startTime, query);
+            AFTime startTime = DateTime.Today.AddDays(-7);
+            string queryString = $"template:\"{eventFrameTemplate.Name}\"";
+            AFEventFrameSearch eventFrameSearch = new AFEventFrameSearch(database, "EventFrame Captures", AFEventFrameSearchMode.ForwardFromStartTime, startTime, queryString);
 
-            int startIndex = 0;
+            eventFrameSearch.CacheTimeout = TimeSpan.FromMinutes(5);
+            int count = 0;
             foreach (AFEventFrame item in eventFrameSearch.FindEventFrames())
             {
                 item.CaptureValues();
-                if ((startIndex++ % 512) == 0)
+                if ((count++ % 500) == 0)
                     database.CheckIn();
             }
-
-            database.CheckIn();
+            if (database.IsDirty)
+                database.CheckIn();
         }
 
         static void PrintReport(AFDatabase database, AFElementTemplate eventFrameTemplate)
         {
-            DateTime timereference = DateTime.Now.AddDays(-7);
-            AFTime startTime = new AFTime(new DateTime(timereference.Year, timereference.Month, timereference.Day, 0, 0, 0, DateTimeKind.Local));
-            AFTime endTime = startTime.LocalTime.AddDays(+8);
-            string query = string.Format("template:\"{0}\" ElementName:\"{1}\"", eventFrameTemplate.Name, "Meter003");
-            AFEventFrameSearch eventFrameSearch = new AFEventFrameSearch(database, "EventFrame Captures", AFSearchMode.StartInclusive, startTime, endTime, query);
+            AFTime startTime = DateTime.Today.AddDays(-7);
+            AFTime endTime = startTime.LocalTime.AddDays(+8); // Or DateTime.Today.AddDays(1);
+            string queryString = $"template:'{eventFrameTemplate.Name}' ElementName:Meter003";
+            AFEventFrameSearch eventFrameSearch = new AFEventFrameSearch(database, "EventFrame Captures", AFSearchMode.StartInclusive, startTime, endTime, queryString);          
 
-            foreach (AFEventFrame ef in eventFrameSearch.FindEventFrames())
-            {
-                Console.WriteLine("{0}, {1}, {2}",
-                    ef.Name,
-                    ef.PrimaryReferencedElement.Name,
-                    ef.Attributes["Average Energy Usage"].GetValue().Value);
-            }
+                foreach (AFEventFrame ef in eventFrameSearch.FindEventFrames())
+                {
+                    Console.WriteLine("{0}, {1}, {2}",
+                        ef.Name,
+                        ef.PrimaryReferencedElement.Name,
+                        ef.Attributes["Average Energy Usage"].GetValue().Value);
+                }
         }
     }
 }

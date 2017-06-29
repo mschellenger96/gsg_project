@@ -34,4 +34,8 @@ Below is a log of changes that have been made:
 
 - Added conditional CheckIns where appropriate
 
-- Removed XML documentation from
+- Removed XML documentation
+
+- Lesson 5:
+	- Cleaned up Exercise 1, 3, 4 for clarity
+	- Implemented AFSearch in Exercise 2
