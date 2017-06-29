@@ -1,7 +1,7 @@
 Getting Started with AF SDK
-#############################
+=================================
 
-Project to update code and documentation for PI AF SDK Getting Started Guide for purposes of increasing clarity.
+#### Project to update code and documentation for PI AF SDK Getting Started Guide for purposes of increasing clarity.
 
 Below is a log of changes that have been made:
 -------------------------------------------------
