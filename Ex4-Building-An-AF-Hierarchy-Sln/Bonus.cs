@@ -50,12 +50,14 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
         private static void CreateCategories(AFDatabase database)
         {
             if (database == null) return;
-            var items = new List<string>();
-            items.Add("Measures Energy");
-            items.Add("Shows Status");
-            items.Add("Building Info");
-            items.Add("Location");
-            items.Add("Time - Series Data");
+            var items = new List<string>
+            {
+                "Measures Energy",
+                "Shows Status",
+                "Building Info",
+                "Location",
+                "Time - Series Data"
+            };
             foreach (var item in items)
             {
                 if (!database.ElementCategories.Contains(item))
@@ -87,87 +89,92 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
                 database.CheckIn();
         }
 
+        
         private static void CreateTemplates(AFDatabase database)
         {
             if (database == null) return;
+            AFElementTemplate meterBasicTemplate = CreateMeterBasicTemplate(database);
+            CreateMeterAdvancedTemplate(meterBasicTemplate);
+            CreateCityTemplate(database);
+            if (database.IsDirty)
+                database.CheckIn();
+        }
+
+        private static AFElementTemplate CreateMeterBasicTemplate(AFDatabase database)
+        {
+            AFElementTemplate meterBasicTemplate = database.ElementTemplates["MeterBasic"];
+            if (meterBasicTemplate != null)
+                return meterBasicTemplate;
 
             UOM uom = database.PISystem.UOMDatabase.UOMs["kilowatt hour"];
-
             AFCategory mEnergyE = database.ElementCategories["Measures Energy"];
-            AFCategory sStatusE = database.ElementCategories["Shows Status"];
-
             AFCategory bInfoA = database.AttributeCategories["Building Info"];
             AFCategory locationA = database.AttributeCategories["Location"];
             AFCategory tsDataA = database.AttributeCategories["Time-Series Data"];
-
             AFEnumerationSet bTypeNum = database.EnumerationSets["Building Type"];
+
+            meterBasicTemplate = database.ElementTemplates.Add("MeterBasic");
+            meterBasicTemplate.Categories.Add(mEnergyE);
+
+            AFAttributeTemplate substationAttrTemp = meterBasicTemplate.AttributeTemplates.Add("Substation");
+            substationAttrTemp.Type = typeof(string);
+
+            AFAttributeTemplate usageLimitAttrTemp = meterBasicTemplate.AttributeTemplates.Add("Usage Limit");
+            usageLimitAttrTemp.Type = typeof(string);
+            usageLimitAttrTemp.DefaultUOM = uom;
+
+            AFAttributeTemplate buildingAttrTemp = meterBasicTemplate.AttributeTemplates.Add("Building");
+            buildingAttrTemp.Type = typeof(string);
+            buildingAttrTemp.Categories.Add(bInfoA);
+
+            AFAttributeTemplate bTypeAttrTemp = meterBasicTemplate.AttributeTemplates.Add("Building Type");
+            bTypeAttrTemp.TypeQualifier = bTypeNum;
+            bTypeAttrTemp.Categories.Add(bInfoA);
+
+            AFAttributeTemplate cityAttrTemp = meterBasicTemplate.AttributeTemplates.Add("City");
+            cityAttrTemp.Type = typeof(string);
+            cityAttrTemp.Categories.Add(locationA);
+
+            AFAttributeTemplate energyUsageAttrTemp = meterBasicTemplate.AttributeTemplates.Add("Energy Usage");
+            energyUsageAttrTemp.Type = typeof(Single);
+            energyUsageAttrTemp.Categories.Add(tsDataA);
+            energyUsageAttrTemp.DefaultUOM = uom;
+            energyUsageAttrTemp.DataReferencePlugIn = database.PISystem.DataReferencePlugIns["PI Point"];
+            energyUsageAttrTemp.ConfigString = @"\\%@\Configuration|PIDataArchiveName%\%Element%.%Attribute%;UOM=kWh";
+
+            return meterBasicTemplate;
+        }
+
+        private static void CreateMeterAdvancedTemplate(AFElementTemplate meterBasicTemplate)
+        {
+            AFDatabase database = meterBasicTemplate.Database;
+            AFElementTemplate meterAdvancedTemplate = database.ElementTemplates.Add("MeterAdvanced");
+            if (meterAdvancedTemplate != null)
+                return;
+
+            AFCategory tsDataA = database.AttributeCategories["Time-Series Data"];
             AFEnumerationSet mStatusEnum = database.EnumerationSets["Meter Status"];
 
-            // Create MeterBasic Element Template
+            meterAdvancedTemplate.BaseTemplate = meterBasicTemplate;
 
-            AFElementTemplate meterBasicTemplate;
-            if (!database.ElementTemplates.Contains("MeterBasic"))
-            {
-                meterBasicTemplate = database.ElementTemplates.Add("MeterBasic");
-                meterBasicTemplate.Categories.Add(mEnergyE);
+            AFAttributeTemplate statusAttrTemp = meterAdvancedTemplate.AttributeTemplates.Add("Status");
+            statusAttrTemp.TypeQualifier = mStatusEnum;
+            statusAttrTemp.Categories.Add(tsDataA);
+            statusAttrTemp.DataReferencePlugIn = database.PISystem.DataReferencePlugIns["PI Point"];
+            statusAttrTemp.ConfigString = @"\\%@\Configuration|PIDataArchiveName%\%Element%.%Attribute%";
+        }
 
-                AFAttributeTemplate substationAttrTemp = meterBasicTemplate.AttributeTemplates.Add("Substation");
-                substationAttrTemp.Type = typeof(string);
+        private static void CreateCityTemplate(AFDatabase database)
+        {
+            AFElementTemplate cityTemplate = database.ElementTemplates["City"];
+            if (cityTemplate != null)
+                return;
 
-                AFAttributeTemplate usageLimitAttrTemp = meterBasicTemplate.AttributeTemplates.Add("Usage Limit");
-                usageLimitAttrTemp.Type = typeof(string);
-                usageLimitAttrTemp.DefaultUOM = uom;
-
-                AFAttributeTemplate buildingAttrTemp = meterBasicTemplate.AttributeTemplates.Add("Building");
-                buildingAttrTemp.Type = typeof(string);
-                buildingAttrTemp.Categories.Add(bInfoA);
-
-                AFAttributeTemplate bTypeAttrTemp = meterBasicTemplate.AttributeTemplates.Add("Building Type");
-                bTypeAttrTemp.TypeQualifier = bTypeNum;
-                bTypeAttrTemp.Categories.Add(bInfoA);
-
-                AFAttributeTemplate cityAttrTemp = meterBasicTemplate.AttributeTemplates.Add("City");
-                cityAttrTemp.Type = typeof(string);
-                cityAttrTemp.Categories.Add(locationA);
-
-                AFAttributeTemplate energyUsageAttrTemp = meterBasicTemplate.AttributeTemplates.Add("Energy Usage");
-                energyUsageAttrTemp.Type = typeof(double);
-                energyUsageAttrTemp.Categories.Add(tsDataA);
-                energyUsageAttrTemp.DefaultUOM = uom;
-                energyUsageAttrTemp.DataReferencePlugIn = database.PISystem.DataReferencePlugIns["PI Point"];
-                energyUsageAttrTemp.ConfigString = @"\\%@\Configuration|PIDataArchiveName%\%Element%.%Attribute%;UOM=kWh";
-            }
-            else
-                meterBasicTemplate = database.ElementTemplates["MeterBasic"];
-
-            // Create MeterAdvanced Element Template
-
-            if (!database.ElementTemplates.Contains("MeterAdvanced"))
-            {
-                AFElementTemplate meterAdvancedTemplate = database.ElementTemplates.Add("MeterAdvanced");
-                meterAdvancedTemplate.BaseTemplate = meterBasicTemplate;
-
-                AFAttributeTemplate statusAttrTemp = meterAdvancedTemplate.AttributeTemplates.Add("Status");
-                statusAttrTemp.TypeQualifier = mStatusEnum;
-                statusAttrTemp.Categories.Add(tsDataA);
-                statusAttrTemp.DataReferencePlugIn = database.PISystem.DataReferencePlugIns["PI Point"];
-                statusAttrTemp.ConfigString = @"\\%@\Configuration|PIDataArchiveName%\%Element%.%Attribute%";
-
-                // Create city Element Template
-
-                AFElementTemplate cityTemplate = database.ElementTemplates.Add("City");
-
-                AFAttributeTemplate cityEnergyUsageAttrTemp = cityTemplate.AttributeTemplates.Add("Energy Usage");
-                cityEnergyUsageAttrTemp.Type = typeof(double);
-                cityEnergyUsageAttrTemp.DefaultUOM = uom;
-                cityEnergyUsageAttrTemp.DataReferencePlugIn = database.PISystem.DataReferencePlugIns["PI Point"];
-                cityEnergyUsageAttrTemp.ConfigString = @"\\%@\Configuration|PIDataArchiveName%\%Element%.%Attribute%";
-            }
-
-            // Do a checkin at the end instead of one-by-one.
-
-            if (database.IsDirty)
-                database.CheckIn();
+            AFAttributeTemplate cityEnergyUsageAttrTemp = cityTemplate.AttributeTemplates.Add("Energy Usage");
+            cityEnergyUsageAttrTemp.Type = typeof(Single);
+            cityEnergyUsageAttrTemp.DefaultUOM = database.PISystem.UOMDatabase.UOMs["kilowatt hour"];
+            cityEnergyUsageAttrTemp.DataReferencePlugIn = database.PISystem.DataReferencePlugIns["PI Point"];
+            cityEnergyUsageAttrTemp.ConfigString = @"\\%@\Configuration|PIDataArchiveName%\%Element%.%Attribute%";
         }
 
         private static void CreateElements(AFDatabase database)
@@ -206,11 +213,6 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
                 database.CheckIn();
         }
 
-        /// <summary>
-        /// This methods fills the static attributes for the first meter only.
-        /// In real situation, the configuration would come from a third party source e.g. xml or sql query... 
-        /// </summary>
-        /// <param name="database"></param>
         private static void SetAttributeValues(AFDatabase database)
         {
             if (database == null) return;
@@ -268,8 +270,7 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
             montreal.Elements.Add(meters.Elements["Meter011"], weakRefType);
             montreal.Elements.Add(meters.Elements["Meter012"], weakRefType);
 
-            if (database.IsDirty)
-                database.CheckIn();
+            database.CheckIn();
         }
     }
 }

@@ -56,9 +56,32 @@ namespace Ex4_Building_An_AF_Hierarchy
             // Your code here
         }
 
-        static void CreateTemplates(AFDatabase database)
+        private static void CreateTemplates(AFDatabase database)
         {
             if (database == null) return;
+            // Your code here
+
+        }
+
+        // Helper method for CreateTemplates
+        private static AFElementTemplate CreateMeterBasicTemplate(AFDatabase database)
+        {
+            AFElementTemplate meterBasicTemplate = database.ElementTemplates["MeterBasic"];
+            if (meterBasicTemplate != null)
+                return meterBasicTemplate;
+
+            // Your code here
+
+            return meterBasicTemplate;
+        }
+
+        private static void CreateMeterAdvancedTemplate(AFElementTemplate meterBasicTemplate)
+        {
+            // Your code here
+        }
+
+        private static void CreateCityTemplate(AFDatabase database)
+        {
             // Your code here
         }
 
