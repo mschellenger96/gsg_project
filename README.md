@@ -39,3 +39,6 @@ Below is a log of changes that have been made:
 - Lesson 5:
 	- Cleaned up Exercise 1, 3, 4 for clarity
 	- Implemented AFSearch in Exercise 2
+
+- Added server-side caching for search objects in lesson 2 and 5 with using() {} blocks
+	- Added cache timeout for any potential issues
