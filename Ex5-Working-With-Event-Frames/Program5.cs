@@ -83,22 +83,24 @@ namespace Ex5_Working_With_EventFrames_Sln
             string queryString = "Template:MeterBasic";
             {
                 // This method returns the collection of AFBaseElement objects that were created with this template.
-                AFElementSearch elementQuery = new AFElementSearch(database, "Meters", queryString);
-
-                DateTime timeReference = DateTime.Today.AddDays(-7);
-                int count = 0;
-                foreach (AFElement meter in elementQuery.FindElements())
+                using (AFElementSearch elementQuery = new AFElementSearch(database, "Meters", queryString))
                 {
-                    foreach (int day in Enumerable.Range(1, 7))
+
+                    DateTime timeReference = DateTime.Today.AddDays(-7);
+                    int count = 0;
+                    foreach (AFElement meter in elementQuery.FindElements())
                     {
-                        AFTime startTime = new AFTime(timeReference.AddDays(day - 1));
-                        AFTime endTime = new AFTime(startTime.LocalTime.AddDays(1));
-                        AFEventFrame ef = new AFEventFrame(database, "*", eventFrameTemplate);
-                        ef.SetStartTime(startTime);
-                        ef.SetEndTime(endTime);
-                        ef.PrimaryReferencedElement = meter;
-                        if (++count % 500 == 0)
-                            database.CheckIn();
+                        foreach (int day in Enumerable.Range(1, 7))
+                        {
+                            AFTime startTime = new AFTime(timeReference.AddDays(day - 1));
+                            AFTime endTime = new AFTime(startTime.LocalTime.AddDays(1));
+                            AFEventFrame ef = new AFEventFrame(database, "*", eventFrameTemplate);
+                            ef.SetStartTime(startTime);
+                            ef.SetEndTime(endTime);
+                            ef.PrimaryReferencedElement = meter;
+                            if (++count % 500 == 0)
+                                database.CheckIn();
+                        }
                     }
                 }
             } 
@@ -111,18 +113,19 @@ namespace Ex5_Working_With_EventFrames_Sln
             // Formulate search constraints on time and template
             AFTime startTime = DateTime.Today.AddDays(-7);
             string queryString = $"template:\"{eventFrameTemplate.Name}\"";
-            AFEventFrameSearch eventFrameSearch = new AFEventFrameSearch(database, "EventFrame Captures", AFEventFrameSearchMode.ForwardFromStartTime, startTime, queryString);
-
-            eventFrameSearch.CacheTimeout = TimeSpan.FromMinutes(5);
-            int count = 0;
-            foreach (AFEventFrame item in eventFrameSearch.FindEventFrames())
+            using (AFEventFrameSearch eventFrameSearch = new AFEventFrameSearch(database, "EventFrame Captures", AFEventFrameSearchMode.ForwardFromStartTime, startTime, queryString))
             {
-                item.CaptureValues();
-                if ((count++ % 500) == 0)
+                eventFrameSearch.CacheTimeout = TimeSpan.FromMinutes(5);
+                int count = 0;
+                foreach (AFEventFrame item in eventFrameSearch.FindEventFrames())
+                {
+                    item.CaptureValues();
+                    if ((count++ % 500) == 0)
+                        database.CheckIn();
+                }
+                if (database.IsDirty)
                     database.CheckIn();
             }
-            if (database.IsDirty)
-                database.CheckIn();
         }
 
         static void PrintReport(AFDatabase database, AFElementTemplate eventFrameTemplate)
@@ -130,8 +133,9 @@ namespace Ex5_Working_With_EventFrames_Sln
             AFTime startTime = DateTime.Today.AddDays(-7);
             AFTime endTime = startTime.LocalTime.AddDays(+8); // Or DateTime.Today.AddDays(1);
             string queryString = $"template:'{eventFrameTemplate.Name}' ElementName:Meter003";
-            AFEventFrameSearch eventFrameSearch = new AFEventFrameSearch(database, "EventFrame Captures", AFSearchMode.StartInclusive, startTime, endTime, queryString);          
-
+            using (AFEventFrameSearch eventFrameSearch = new AFEventFrameSearch(database, "EventFrame Captures", AFSearchMode.StartInclusive, startTime, endTime, queryString))
+            {
+                eventFrameSearch.CacheTimeout = TimeSpan.FromMinutes(5);
                 foreach (AFEventFrame ef in eventFrameSearch.FindEventFrames())
                 {
                     Console.WriteLine("{0}, {1}, {2}",
@@ -139,6 +143,7 @@ namespace Ex5_Working_With_EventFrames_Sln
                         ef.PrimaryReferencedElement.Name,
                         ef.Attributes["Average Energy Usage"].GetValue().Value);
                 }
+            }
         }
     }
 }

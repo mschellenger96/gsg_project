@@ -61,15 +61,17 @@ namespace Ex2_Searching_For_Assets_Sln
 
             // Default search is as an element name string mask.
             var queryString = $"\"{elementNameFilter}\"";
-            AFElementSearch elementQuery = new AFElementSearch(database, "ElementSearch", queryString);
-            foreach (AFElement element in elementQuery.FindElements())
+            using (AFElementSearch elementQuery = new AFElementSearch(database, "ElementSearch", queryString))
             {
-                Console.WriteLine("Element: {0}, Template: {1}, Categories: {2}",
-                    element.Name,
-                    element.Template.Name,
-                    element.CategoriesString);
+                elementQuery.CacheTimeout = TimeSpan.FromMinutes(5);
+                foreach (AFElement element in elementQuery.FindElements())
+                {
+                    Console.WriteLine("Element: {0}, Template: {1}, Categories: {2}",
+                        element.Name,
+                        element.Template.Name,
+                        element.CategoriesString);
+                }
             }
-
             Console.WriteLine();
         }
 
@@ -77,19 +79,20 @@ namespace Ex2_Searching_For_Assets_Sln
         {
             Console.WriteLine("Find Meters by Template: {0}", templateName);
 
-            AFElementSearch elementQuery = new AFElementSearch(database, "TemplateSearch", string.Format("template:\"{0}\"", templateName));
-            AFElementSearch templateFilter = new AFElementSearch(database, "DerivedTemplates", "templateName:\"MeterAdvanced\"");
-            int countDerived = 0;
-            foreach (AFElement element in elementQuery.FindElements())
+            using (AFElementSearch elementQuery = new AFElementSearch(database, "TemplateSearch", string.Format("template:\"{0}\"", templateName)))
             {
-                Console.WriteLine("Element: {0}, Template: {1}", element.Name, element.Template.Name);
-                if (templateFilter.IsMatch(element))
-                    countDerived++;
+                elementQuery.CacheTimeout = TimeSpan.FromMinutes(5);
+                int countDerived = 0;
+                foreach (AFElement element in elementQuery.FindElements())
+                {
+                    Console.WriteLine("Element: {0}, Template: {1}", element.Name, element.Template.Name);
+                    if (element.Template.Name != templateName)
+                        countDerived++;
+                }
+
+                Console.WriteLine("   Found {0} derived templates", countDerived);
+                Console.WriteLine();
             }
-
-            Console.WriteLine("   Found {0} derived templates", countDerived);
-
-            Console.WriteLine();
         }
 
         static void FindMetersBySubstation(AFDatabase database, string substationLocation)
@@ -98,16 +101,18 @@ namespace Ex2_Searching_For_Assets_Sln
 
             string templateName = "MeterBasic";
             string attributeName = "Substation";
-            AFElementSearch elementQuery = new AFElementSearch(database, "AttributeValueEQSearch",
-                string.Format("template:\"{0}\" \"|{1}\":\"{2}\"", templateName, attributeName, substationLocation));
-
-            int countNames = 0;
-            foreach (AFElement element in elementQuery.FindElements())
+            using (AFElementSearch elementQuery = new AFElementSearch(database, "AttributeValueEQSearch",
+                string.Format("template:\"{0}\" \"|{1}\":\"{2}\"", templateName, attributeName, substationLocation)))
             {
-                Console.Write("{0}{1}", countNames++ == 0 ? string.Empty : ", ", element.Name);
-            }
+                elementQuery.CacheTimeout = TimeSpan.FromMinutes(5);
+                int countNames = 0;
+                foreach (AFElement element in elementQuery.FindElements())
+                {
+                    Console.Write("{0}{1}", countNames++ == 0 ? string.Empty : ", ", element.Name);
+                }
 
-            Console.WriteLine("\n");
+                Console.WriteLine("\n");
+            }
         }
 
         static void FindMetersAboveUsage(AFDatabase database, double val)
@@ -116,16 +121,18 @@ namespace Ex2_Searching_For_Assets_Sln
 
             string templateName = "MeterBasic";
             string attributeName = "Energy Usage";
-            AFElementSearch elementQuery = new AFElementSearch(database, "AttributeValueGTSearch",
-                string.Format("template:\"{0}\" \"|{1}\":>{2}", templateName, attributeName, val));
-
-            int countNames = 0;
-            foreach (AFElement element in elementQuery.FindElements())
+            using (AFElementSearch elementQuery = new AFElementSearch(database, "AttributeValueGTSearch",
+                string.Format("template:\"{0}\" \"|{1}\":>{2}", templateName, attributeName, val)))
             {
-                Console.Write("{0}{1}", countNames++ == 0 ? string.Empty : ", ", element.Name);
-            }
+                elementQuery.CacheTimeout = TimeSpan.FromMinutes(5);
+                int countNames = 0;
+                foreach (AFElement element in elementQuery.FindElements())
+                {
+                    Console.Write("{0}{1}", countNames++ == 0 ? string.Empty : ", ", element.Name);
+                }
 
-            Console.WriteLine("\n");
+                Console.WriteLine("\n");
+            }
         }
 
         static void FindBuildingInfo(AFDatabase database, string templateName)
@@ -134,21 +141,22 @@ namespace Ex2_Searching_For_Assets_Sln
 
             AFElementTemplate elemTemp = database.ElementTemplates[templateName];
             AFCategory buildingInfoCat = database.AttributeCategories["Building Info"];
-            
-            AFElementSearch elementQuery = new AFElementSearch(database, "AttributeCattegorySearch", string.Format("template:\"{0}\"", templateName));
             AFNamedCollectionList<AFAttribute> foundAttributes = new AFNamedCollectionList<AFAttribute>();
 
-            foreach (AFElement element in elementQuery.FindElements())
+            using (AFElementSearch elementQuery = new AFElementSearch(database, "AttributeCattegorySearch", string.Format("template:\"{0}\"", templateName)))
             {
-                foreach (AFAttribute attr in element.Attributes)
+                elementQuery.CacheTimeout = TimeSpan.FromMinutes(5);
+                foreach (AFElement element in elementQuery.FindElements())
                 {
-                    if (attr.Categories.Contains(buildingInfoCat))
+                    foreach (AFAttribute attr in element.Attributes)
                     {
-                        foundAttributes.Add(attr);
+                        if (attr.Categories.Contains(buildingInfoCat))
+                        {
+                            foundAttributes.Add(attr);
+                        }
                     }
                 }
             }
-
             Console.WriteLine("Found {0} attributes.", foundAttributes.Count);
             Console.WriteLine();
         }

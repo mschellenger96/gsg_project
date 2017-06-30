@@ -61,15 +61,17 @@ namespace Ex2_Searching_For_Assets
 
             // Default search is as an element name string mask.
             var queryString = $"\"{elementNameFilter}\"";
-            AFElementSearch elementQuery = new AFElementSearch(database, "ElementSearch", queryString);
-            foreach (AFElement element in elementQuery.FindElements())
+            using (AFElementSearch elementQuery = new AFElementSearch(database, "ElementSearch", queryString))
             {
-                Console.WriteLine("Element: {0}, Template: {1}, Categories: {2}",
-                    element.Name,
-                    element.Template.Name,
-                    element.CategoriesString);
+                elementQuery.CacheTimeout = TimeSpan.FromMinutes(5);
+                foreach (AFElement element in elementQuery.FindElements())
+                {
+                    Console.WriteLine("Element: {0}, Template: {1}, Categories: {2}",
+                        element.Name,
+                        element.Template.Name,
+                        element.CategoriesString);
+                }
             }
-
             Console.WriteLine();
         }
 
