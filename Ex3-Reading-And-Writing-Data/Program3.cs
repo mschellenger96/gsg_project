@@ -21,6 +21,7 @@ using OSIsoft.AF.Asset;
 using OSIsoft.AF.Data;
 using OSIsoft.AF.PI;
 using OSIsoft.AF.Time;
+using OSIsoft.AF.Search;
 
 namespace Ex3_Reading_And_Writing_Data
 {
@@ -122,37 +123,24 @@ namespace Ex3_Reading_And_Writing_Data
             // Your code here
         }
 
-        static AFAttributeList GetAttributes(AFDatabase database)
+        static AFAttributeList GetAttributes(AFDatabase database, string templateName, string attributeName)
         {
-            int startIndex = 0;
-            int pageSize = 1000;
-            int totalCount;
-
             AFAttributeList attrList = new AFAttributeList();
 
-            do
+            using (AFElementSearch elementQuery = new AFElementSearch(database, "AttributeSearch", string.Format("template:\"{0}\"", templateName)))
             {
-                AFAttributeList results = AFAttribute.FindElementAttributes(
-                     database: database,
-                     searchRoot: null,
-                     nameFilter: null,
-                     elemCategory: null,
-                     elemTemplate: database.ElementTemplates["MeterBasic"],
-                     elemType: AFElementType.Any,
-                     attrNameFilter: "Energy Usage",
-                     attrCategory: null,
-                     attrType: TypeCode.Empty,
-                     searchFullHierarchy: true,
-                     sortField: AFSortField.Name,
-                     sortOrder: AFSortOrder.Ascending,
-                     startIndex: startIndex,
-                     maxCount: pageSize,
-                     totalCount: out totalCount);
-
-                attrList.AddRange(results);
-
-                startIndex += pageSize;
-            } while (startIndex < totalCount);
+                elementQuery.CacheTimeout = TimeSpan.FromMinutes(5);
+                foreach (AFElement element in elementQuery.FindElements())
+                {
+                    foreach (AFAttribute attr in element.Attributes)
+                    {
+                        if (attr.Name.Equals(attributeName))
+                        {
+                            attrList.Add(attr);
+                        }
+                    }
+                }
+            }
 
             return attrList;
         }
