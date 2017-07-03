@@ -44,3 +44,5 @@ Below is a log of changes that have been made:
 	- Added cache timeout for any potential issues
 
 - Simplified Lesson 1 PrintElementTemplates() to just use AFElementTemplate data type instead of a list
+
+- Used the correct search method (AFElementSearch) in Lesson 3
