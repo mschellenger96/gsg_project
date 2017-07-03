@@ -46,3 +46,5 @@ Below is a log of changes that have been made:
 - Simplified Lesson 1 PrintElementTemplates() to just use AFElementTemplate data type instead of a list
 
 - Used the correct search method (AFElementSearch) in Lesson 3
+
+- Removed new line characters from print statements in Lesson 1 for consistency
