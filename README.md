@@ -42,3 +42,5 @@ Below is a log of changes that have been made:
 
 - Added server-side caching for search objects in lesson 2 and 5 with using() {} blocks
 	- Added cache timeout for any potential issues
+
+- Simplified Lesson 1 PrintElementTemplates() to just use AFElementTemplate data type instead of a list
