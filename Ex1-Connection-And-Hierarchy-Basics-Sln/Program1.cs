@@ -96,7 +96,7 @@ namespace Ex1_Connection_And_Hierarchy_Basics_Sln
 
         static void PrintEnumerationSets(AFDatabase database)
         {
-            Console.WriteLine("Print Enumeration Sets\n");
+            Console.WriteLine("Print Enumeration Sets");
             AFEnumerationSets enumSets = database.EnumerationSets;
             foreach (AFEnumerationSet enumSet in enumSets)
             {
@@ -112,7 +112,7 @@ namespace Ex1_Connection_And_Hierarchy_Basics_Sln
 
         static void PrintCategories(AFDatabase database)
         {
-            Console.WriteLine("Print Categories\n");
+            Console.WriteLine("Print Categories");
             Console.WriteLine("Element Categories");
             foreach (AFCategory category in database.ElementCategories)
             {
