@@ -63,17 +63,7 @@ namespace Ex1_Connection_And_Hierarchy_Basics_Sln
             AFNamedCollectionList<AFElementTemplate> elemTemplates = database.ElementTemplates.FilterBy(typeof(AFElement));
             foreach (AFElementTemplate elemTemp in elemTemplates)
             {
-                var categories = new List<string>();
-                foreach (AFCategory category in elemTemp.Categories)
-                {
-                    categories.Add(category.Name);
-                }
-
-                string categoriesString = string.Join(",", categories);
-                Console.WriteLine("Name: {0}; Categories: {1}", elemTemp.Name, categoriesString);
-
-                // Note: An alternative approach is to use CategoriesString directly: "CategoriesString read only property returns the list of categories in a string separated by semicolons."
-                //Console.WriteLine("Name: {0}, Categories: {1}", elemTemp.Name, elemTemp.CategoriesString);
+                Console.WriteLine("Name: {0}; Categories: {1}", elemTemp.Name, elemTemp.CategoriesString);
             }
 
             Console.WriteLine();
