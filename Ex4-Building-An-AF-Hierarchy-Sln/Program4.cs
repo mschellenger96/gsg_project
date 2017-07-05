@@ -30,7 +30,7 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
             CreateWeakReference(database);
 
             // This bonus exercise  creates a replica database
-            //Bonus.Run();
+            Bonus.Run();
 
             Console.WriteLine("Press ENTER key to close");
             Console.ReadLine();

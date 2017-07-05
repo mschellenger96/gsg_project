@@ -145,26 +145,25 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
             return meterBasicTemplate;
         }
 
-        private static void CreateMeterAdvancedTemplate(AFElementTemplate meterBasicTemplate)
-        {
-            AFDatabase database = meterBasicTemplate.Database;
-            AFElementTemplate meterAdvancedTemplate = database.ElementTemplates.Add("MeterAdvanced");
-            if (meterAdvancedTemplate != null)
-                return;
+		private static void CreateMeterAdvancedTemplate(AFElementTemplate meterBasicTemplate)
+		{
+			AFDatabase database = meterBasicTemplate.Database;
+			AFElementTemplate meterAdvancedTemplate = database.ElementTemplates["MeterAdvanced"] ?? database.ElementTemplates.Add("MeterAdvanced");
 
-            AFCategory tsDataA = database.AttributeCategories["Time-Series Data"];
-            AFEnumerationSet mStatusEnum = database.EnumerationSets["Meter Status"];
+			AFCategory tsDataA = database.AttributeCategories["Time-Series Data"];
+			AFEnumerationSet mStatusEnum = database.EnumerationSets["Meter Status"];
 
-            meterAdvancedTemplate.BaseTemplate = meterBasicTemplate;
+			meterAdvancedTemplate.BaseTemplate = meterBasicTemplate;
 
-            AFAttributeTemplate statusAttrTemp = meterAdvancedTemplate.AttributeTemplates.Add("Status");
-            statusAttrTemp.TypeQualifier = mStatusEnum;
-            statusAttrTemp.Categories.Add(tsDataA);
-            statusAttrTemp.DataReferencePlugIn = database.PISystem.DataReferencePlugIns["PI Point"];
-            statusAttrTemp.ConfigString = @"\\%@\Configuration|PIDataArchiveName%\%Element%.%Attribute%";
-        }
+			AFAttributeTemplate statusAttrTemp = meterAdvancedTemplate.AttributeTemplates["Status"] ?? meterAdvancedTemplate.AttributeTemplates.Add("Status");
+			statusAttrTemp.TypeQualifier = mStatusEnum;
+			if (!statusAttrTemp.Categories.Contains(tsDataA))
+				statusAttrTemp.Categories.Add(tsDataA);
+			statusAttrTemp.DataReferencePlugIn = database.PISystem.DataReferencePlugIns["PI Point"];
+			statusAttrTemp.ConfigString = @"\\%@\Configuration|PIDataArchiveName%\%Element%.%Attribute%";
+		}
 
-        private static void CreateCityTemplate(AFDatabase database)
+		private static void CreateCityTemplate(AFDatabase database)
         {
             AFElementTemplate cityTemplate = database.ElementTemplates["City"];
             if (cityTemplate != null)
@@ -249,28 +248,21 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
             if (database == null) return;
 
             AFReferenceType weakRefType = database.ReferenceTypes["Weak Reference"];
-
             AFElement meters = database.Elements["Meters"];
-
-            AFElement london = database.Elements["Geographical Locations"].Elements["London"];
-            london.Elements.Add(meters.Elements["Meter001"], weakRefType);
-            london.Elements.Add(meters.Elements["Meter002"], weakRefType);
-            london.Elements.Add(meters.Elements["Meter003"], weakRefType);
-            london.Elements.Add(meters.Elements["Meter004"], weakRefType);
-
-            AFElement sanFrancisco = database.Elements["Geographical Locations"].Elements["San Francisco"];
-            sanFrancisco.Elements.Add(meters.Elements["Meter005"], weakRefType);
-            sanFrancisco.Elements.Add(meters.Elements["Meter006"], weakRefType);
-            sanFrancisco.Elements.Add(meters.Elements["Meter007"], weakRefType);
-            sanFrancisco.Elements.Add(meters.Elements["Meter008"], weakRefType);
-
-            AFElement montreal = database.Elements["Geographical Locations"].Elements["Montreal"];
-            montreal.Elements.Add(meters.Elements["Meter009"], weakRefType);
-            montreal.Elements.Add(meters.Elements["Meter010"], weakRefType);
-            montreal.Elements.Add(meters.Elements["Meter011"], weakRefType);
-            montreal.Elements.Add(meters.Elements["Meter012"], weakRefType);
-
-            database.CheckIn();
+            AFElement locations = database.Elements["Geographical Locations"];
+			AFElementTemplate cityTemplate = database.ElementTemplates["City"];
+			
+			foreach (AFElement meter in meters.Elements) 
+			{
+				string cityName = meter.Attributes["City"].GetValue().ToString();
+				if (string.IsNullOrEmpty(cityName))
+					continue;
+				AFElement city = locations.Elements[cityName] ?? locations.Elements.Add(cityName, cityTemplate);
+				if (!city.Elements.Contains(meter.Name))
+					city.Elements.Add(meter, weakRefType);
+			}
+			if (database.IsDirty)
+				database.CheckIn();
         }
     }
 }
