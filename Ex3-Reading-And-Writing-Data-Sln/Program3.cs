@@ -236,6 +236,8 @@ namespace Ex3_Reading_And_Writing_Data_Sln
             Console.WriteLine();
         }
 
+
+		// Helper method used in PrintEnergyUsageAtTime() and PrintDailyAverageEnergyUseage
         static AFAttributeList GetAttributes(AFDatabase database, string templateName, string attributeName)
         {
             AFAttributeList attrList = new AFAttributeList();

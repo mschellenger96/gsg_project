@@ -103,7 +103,7 @@ namespace Ex3_Reading_And_Writing_Data
             AFAttributeList attrList = new AFAttributeList();
 
             // Use this method if you get stuck trying to find attributes
-            // attrList = GetAttribute();
+            // attrList = GetAttributes();
 
             // Your code here
         }
@@ -114,7 +114,7 @@ namespace Ex3_Reading_And_Writing_Data
             AFAttributeList attrList = new AFAttributeList();
 
             // Use this method if you get stuck trying to find attributes
-            // attrList = GetAttribute();
+            // attrList = GetAttributes();
         }
 
         static void SwapValues(AFDatabase database, string meter1, string meter2, string startTime, string endTime)
@@ -123,7 +123,10 @@ namespace Ex3_Reading_And_Writing_Data
             // Your code here
         }
 
-        static AFAttributeList GetAttributes(AFDatabase database, string templateName, string attributeName)
+		// Helper method used in PrintEnergyUsageAtTime() and PrintDailyAverageEnergyUseage 
+		// Note that this is an optional method, it is used in the solutions, but it is possible
+		// to get a valid solution without using this method
+		static AFAttributeList GetAttributes(AFDatabase database, string templateName, string attributeName)
         {
             AFAttributeList attrList = new AFAttributeList();
 
