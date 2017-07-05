@@ -48,3 +48,7 @@ Below is a log of changes that have been made:
 - Used the correct search method (AFElementSearch) in Lesson 3
 
 - Removed new line characters from print statements in Lesson 1 for consistency
+
+- Added comment for clarification to GetAttributes() helper method in Lesson 3
+
+- Added null checks and ?? syntax in Lesson 4 and Bonus to remove exceptions when code is run more than once
