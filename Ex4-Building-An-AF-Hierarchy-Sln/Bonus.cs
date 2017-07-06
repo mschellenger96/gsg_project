@@ -148,14 +148,18 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
 		private static void CreateMeterAdvancedTemplate(AFElementTemplate meterBasicTemplate)
 		{
 			AFDatabase database = meterBasicTemplate.Database;
-			AFElementTemplate meterAdvancedTemplate = database.ElementTemplates["MeterAdvanced"] ?? database.ElementTemplates.Add("MeterAdvanced");
+			AFElementTemplate meterAdvancedTemplate = database.ElementTemplates["MeterAdvanced"];
+			if (meterAdvancedTemplate == null)
+				database.ElementTemplates.Add("MeterAdvanced");
 
 			AFCategory tsDataA = database.AttributeCategories["Time-Series Data"];
 			AFEnumerationSet mStatusEnum = database.EnumerationSets["Meter Status"];
 
 			meterAdvancedTemplate.BaseTemplate = meterBasicTemplate;
 
-			AFAttributeTemplate statusAttrTemp = meterAdvancedTemplate.AttributeTemplates["Status"] ?? meterAdvancedTemplate.AttributeTemplates.Add("Status");
+			AFAttributeTemplate statusAttrTemp = meterAdvancedTemplate.AttributeTemplates["Status"];
+			if (statusAttrTemp == null)
+				meterAdvancedTemplate.AttributeTemplates.Add("Status");
 			statusAttrTemp.TypeQualifier = mStatusEnum;
 			if (!statusAttrTemp.Categories.Contains(tsDataA))
 				statusAttrTemp.Categories.Add(tsDataA);
@@ -190,9 +194,7 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
                 name.SetValue(new AFValue("PISRV01"));
             }
                
-
-            AFElement meters;
-            meters = database.Elements["Meters"];
+            AFElement meters = database.Elements["Meters"];
             if (meters == null)
                 meters = database.Elements.Add("Meters");
 
@@ -257,7 +259,9 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
 				string cityName = meter.Attributes["City"].GetValue().ToString();
 				if (string.IsNullOrEmpty(cityName))
 					continue;
-				AFElement city = locations.Elements[cityName] ?? locations.Elements.Add(cityName, cityTemplate);
+				AFElement city = locations.Elements[cityName];
+				if (city == null)
+					locations.Elements.Add(cityName, cityTemplate);
 				if (!city.Elements.Contains(meter.Name))
 					city.Elements.Add(meter, weakRefType);
 			}

@@ -98,6 +98,7 @@ namespace Ex5_Working_With_EventFrames_Sln
                             ef.SetStartTime(startTime);
                             ef.SetEndTime(endTime);
                             ef.PrimaryReferencedElement = meter;
+							// It is good practice to periodically check in the database
                             if (++count % 500 == 0)
                                 database.CheckIn();
                         }
