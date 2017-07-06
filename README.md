@@ -52,3 +52,7 @@ Below is a log of changes that have been made:
 - Added comment for clarification to GetAttributes() helper method in Lesson 3
 
 - Added null checks and ?? syntax in Lesson 4 and Bonus to remove exceptions when code is run more than once
+
+- Changed order of methods in Lesson 4 code for continuity with doc
+
+- Added a contains check in CreateWeakReference

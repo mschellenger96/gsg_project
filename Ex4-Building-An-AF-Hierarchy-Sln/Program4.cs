@@ -30,7 +30,7 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
             CreateWeakReference(database);
 
             // This bonus exercise  creates a replica database
-            Bonus.Run();
+            // Bonus.Run();
 
             Console.WriteLine("Press ENTER key to close");
             Console.ReadLine();
@@ -54,7 +54,16 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
                 return systems.DefaultPISystem;
         }
 
-        static void CreateElementTemplate(AFDatabase database)
+		static void CreateFeedersRootElement(AFDatabase database)
+		{
+			if (database.Elements.Contains("Feeders"))
+				return;
+
+			database.Elements.Add("Feeders");
+			database.CheckIn();
+		}
+
+		static void CreateElementTemplate(AFDatabase database)
         {
             string templateName = "FeederTemplate";
             AFElementTemplate feederTemplate;
@@ -75,15 +84,6 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
             database.CheckIn();
         }
 
-        static void CreateFeedersRootElement(AFDatabase database)
-        {
-            if (database.Elements.Contains("Feeders"))
-                return;
-
-            database.Elements.Add("Feeders");
-            database.CheckIn();
-        }
-
         static void CreateFeederElements(AFDatabase database)
         {
             AFElementTemplate template = database.ElementTemplates["FeederTemplate"];
@@ -100,7 +100,8 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
             AFAttribute power = feeder001.Attributes["Power"];
             power.ConfigString = @"%@\Configuration|PIDataArchiveName%\SINUSOID";
 
-            database.CheckIn();
+			if (database.IsDirty)
+				database.CheckIn();
         }
 
         static void CreateWeakReference(AFDatabase database)
@@ -111,9 +112,10 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
             AFElement feeder0001 = database.Elements["Feeders"].Elements["Feeder001"];
             if (london == null || feeder0001 == null) return;
 
-            london.Elements.Add(feeder0001, weakRefType);
+			if (!london.Elements.Contains(feeder0001))
+				london.Elements.Add(feeder0001, weakRefType);
 
-            database.CheckIn();
+			database.CheckIn();
         }
     }
 }
