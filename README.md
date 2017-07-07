@@ -56,3 +56,5 @@ Below is a log of changes that have been made:
 - Changed order of methods in Lesson 4 code for continuity with doc
 
 - Added a contains check in CreateWeakReference
+
+- Used more verbose null checking instead of ?? syntax for clarity
