@@ -58,3 +58,5 @@ Below is a log of changes that have been made:
 - Added a contains check in CreateWeakReference
 
 - Used more verbose null checking instead of ?? syntax for clarity
+
+- Added folder with solutions with 2 space tabs for adding to documentation
