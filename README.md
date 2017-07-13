@@ -3,6 +3,15 @@ Getting Started with AF SDK
 
 #### Project to update code and documentation for PI AF SDK Getting Started Guide for purposes of increasing clarity.
 
+Files to include for Release Repo:
+-----------------------------------
+- All Ex# folders
+- AF Database
+- CSV
+- License
+- sln file
+- TODO: Make a new README for the release 
+
 Below is a log of changes that have been made:
 -------------------------------------------------
 
