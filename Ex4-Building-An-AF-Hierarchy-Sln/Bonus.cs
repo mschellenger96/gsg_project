@@ -111,9 +111,10 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
             AFCategory bInfoA = database.AttributeCategories["Building Info"];
             AFCategory locationA = database.AttributeCategories["Location"];
             AFCategory tsDataA = database.AttributeCategories["Time-Series Data"];
-            AFEnumerationSet bTypeNum = database.EnumerationSets["Building Type"];
+			AFEnumerationSet bTypeNum = database.EnumerationSets["Building Type"];
+			AFPlugIn PIPoint = database.PISystem.DataReferencePlugIns["PI Point"];
 
-            meterBasicTemplate = database.ElementTemplates.Add("MeterBasic");
+			meterBasicTemplate = database.ElementTemplates.Add("MeterBasic");
             meterBasicTemplate.Categories.Add(mEnergyE);
 
             AFAttributeTemplate substationAttrTemp = meterBasicTemplate.AttributeTemplates.Add("Substation");
@@ -139,7 +140,7 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
             energyUsageAttrTemp.Type = typeof(Single);
             energyUsageAttrTemp.Categories.Add(tsDataA);
             energyUsageAttrTemp.DefaultUOM = uom;
-            energyUsageAttrTemp.DataReferencePlugIn = database.PISystem.DataReferencePlugIns["PI Point"];
+			energyUsageAttrTemp.DataReferencePlugIn = PIPoint;
             energyUsageAttrTemp.ConfigString = @"\\%@\Configuration|PIDataArchiveName%\%Element%.%Attribute%;UOM=kWh";
 
             return meterBasicTemplate;

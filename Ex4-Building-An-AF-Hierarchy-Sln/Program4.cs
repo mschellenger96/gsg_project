@@ -114,8 +114,8 @@ namespace Ex4_Building_An_AF_Hierarchy_Sln
 
 			if (!london.Elements.Contains(feeder0001))
 				london.Elements.Add(feeder0001, weakRefType);
-
-			database.CheckIn();
+			if (database.IsDirty)
+				database.CheckIn();
         }
     }
 }
