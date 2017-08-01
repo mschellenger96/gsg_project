@@ -1,0 +1,35 @@
+# AF SDK Getting Started Guide
+
+## About this content
+
+This repository contains the Visual Studio Exercises and Solutions from the **AF SDK Getting Started Guide**.  
+
+##Introduction
+AF SDK (Asset Framework software development kit) is a .NET-based library that provides access to data stored in the PI System. The information in this Getting Started Guide covers basic usage of AF SDK. AF SDK is one of the available developer technologies that can help you maximize the utility of your PI System. It is recommended that you have a background in .NET application development using C# and a familiarity with the PI System; however, familiarity with AF SDK is not required.
+
+
+##Topics Covered
+- Connection to the PI System and Hierarchy Basics
+- Searching for Assets
+- Reading and Writing Data
+- Building an AF Hierarchy
+- Working with Event Frames
+
+##Getting started
+1. Read the lessons and complete the exercies found in the AF-SDK-Getting-Started-Guide.pdf
+
+# Licensing
+
+Copyright 2016, 2017  OSIsoft, LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
